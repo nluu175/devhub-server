@@ -5,6 +5,8 @@ export interface Book {
   publishedYear?: number;
 }
 
-export interface Context {
-  token?: string;
+export interface BookInput {
+  title: string;
+  author: string;
+  publishedYear?: number;
 }

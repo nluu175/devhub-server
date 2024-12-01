@@ -1,13 +1,10 @@
-import { Book } from "../../types/index";
-import { books } from "../../data/books";
+import { Book } from "../../models/Book";
 
 export const bookQueries = {
-  books: () => books,
-  book: (_: any, { id }: { id: string }) => {
-    const book = books.find((b) => b.id === id);
-    if (!book) {
-      throw new Error("Book not found");
-    }
-    return book;
+  books: async (_: never) => {
+    return await Book.find();
+  },
+  book: async (_: never, { id }: { id: string }) => {
+    return await Book.findById(id);
   },
 };

@@ -1,38 +1,18 @@
-import { Book } from "../../types/index";
-import { books } from "../../data/books";
+import { Book } from "../../models/Book";
+import { BookInput } from "../../types";
 
+// The underscore _ in this context is a convention used for parameters that we need to include in the function signature (because GraphQL resolvers require it) but won't actually use in the function.
+
+// In GraphQL resolvers, each resolver function receives four parameters in this order:
+// function resolver(
+//   parent,    // The parent object (result from previous resolver)
+//   args,      // Arguments passed to the field
+//   context,   // Shared context object (like auth info)
+//   info       // Information about the execution state of the query
+// )
 export const bookMutations = {
-  addBook: (_: any, { input }: { input: Omit<Book, "id"> }) => {
-    const newBook: Book = {
-      id: String(books.length + 1),
-      ...input,
-    };
-    books.push(newBook);
+  addBook: async (_: never, { input }: { input: BookInput }) => {
+    const newBook = await Book.create(input);
     return newBook;
-  },
-  updateBook: (
-    _: any,
-    { id, input }: { id: string; input: Omit<Book, "id"> }
-  ) => {
-    const index = books.findIndex((b) => b.id === id);
-    if (index === -1) {
-      throw new Error("Book not found");
-    }
-
-    const updatedBook = {
-      ...books[index],
-      ...input,
-    };
-    books[index] = updatedBook;
-    return updatedBook;
-  },
-  deleteBook: (_: any, { id }: { id: string }) => {
-    const index = books.findIndex((b) => b.id === id);
-    if (index === -1) {
-      throw new Error("Book not found");
-    }
-
-    books.splice(index, 1);
-    return true;
   },
 };

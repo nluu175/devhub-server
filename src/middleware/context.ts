@@ -1,5 +1,16 @@
 import { Request } from "express";
-import { Context } from "../types/index";
+
+// Add Context interface
+export interface Context {
+  token?: string;
+  // Add more context properties as needed
+  // user?: {
+  //   id: string;
+  //   email: string;
+  //   roles: string[];
+  // };
+  // isAuthenticated: boolean;
+}
 
 export const createContext = async ({
   req,

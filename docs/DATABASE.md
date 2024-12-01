@@ -13,5 +13,8 @@
 - Stop when needed
   `brew services stop mongodb-community`
 
-- MongoDB will be running by default on port 27017. You can test connection by:
+- MongoDB will be running by default on port 27017. You can test connection by
   `mongosh`
+
+- Show all databases
+  `show dbs` or `show databases`
