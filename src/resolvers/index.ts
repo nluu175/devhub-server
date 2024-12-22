@@ -1,10 +1,10 @@
-import { bookResolvers } from "./books";
+import { userResolvers } from "./users";
 
 export const resolvers = {
   Query: {
-    ...bookResolvers.Query,
+    ...userResolvers.Query,
   },
   Mutation: {
-    ...bookResolvers.Mutation,
+    ...userResolvers.Mutation,
   },
 };

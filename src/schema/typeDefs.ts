@@ -1,25 +1,28 @@
 export const typeDefs = `#graphql
-  type Book {
+  type User {
     id: ID!
-    title: String!
-    author: String!
-    publishedYear: Int
+    username: String!
+    email: String!
+    bio: String
+    avatar: String
+    createdAt: String
+    updatedAt: String
   }
 
-  input BookInput {
-    title: String!
-    author: String!
-    publishedYear: Int
+  input UserInput {
+    username: String!
+    email: String!
+    password: String!
+    bio: String
+    avatar: String
   }
 
   type Query {
-    books: [Book!]!
-    book(id: ID!): Book
+    users: [User]
+    user(id: ID!): User
   }
 
   type Mutation {
-    addBook(input: BookInput!): Book!
-    updateBook(id: ID!, input: BookInput!): Book!
-    deleteBook(id: ID!): Boolean!
+    addUser(input: UserInput!): User
   }
 `;

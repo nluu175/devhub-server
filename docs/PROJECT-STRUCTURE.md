@@ -42,3 +42,8 @@ src/
 │   └── index.ts
 └── index.ts             # Combines all resolvers
 ```
+
+## Types
+
+- `types/`directory contains global TypeScript interfaces and types used throughout your application.
+- `resolvers/books/types.ts` would contain resolver-specific types and field resolvers for the Book type in GraphQL.
