@@ -17,6 +17,16 @@ export const typeDefs = `#graphql
     avatar: String
   }
 
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
   type Query {
     users: [User]
     user(id: ID!): User
@@ -24,5 +34,6 @@ export const typeDefs = `#graphql
 
   type Mutation {
     addUser(input: UserInput!): User
+    login(input: LoginInput!): AuthPayload!
   }
 `;

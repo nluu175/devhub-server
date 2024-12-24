@@ -22,5 +22,6 @@ export const httpLogger = (req: Request, res: Response, next: NextFunction) => {
     );
   });
 
+  // Passes control to the next middleware in the HTTP request-response cycle
   next();
 };

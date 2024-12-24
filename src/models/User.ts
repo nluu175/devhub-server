@@ -1,15 +1,13 @@
 import mongoose, { Document, Schema } from "mongoose";
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
+import logger from "../config/logger";
 
 export interface IUser {
-  // core
   username: string;
   email: string;
   password: string;
-  // optional??
   bio?: string;
   avatar?: string;
-  // handled by timestamps
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,36 +60,45 @@ const userSchema = new Schema<IUserDocument>(
     timestamps: true,
     methods: {
       async comparePassword(candidatePassword: string) {
-        const { compare } = await import("bcryptjs");
-        return compare(candidatePassword, this.password);
+        try {
+          const isMatch = await bcrypt.compare(
+            candidatePassword,
+            this.password
+          );
+          return isMatch;
+        } catch (error) {
+          logger.error("Error comparing passwords:", error);
+          throw error;
+        }
       },
     },
     toJSON: {
-      transform: (_, ret) => {
-        delete ret.password; // Remove password from JSON responses
-        return ret;
+      transform: (_, document) => {
+        delete document.password;
+        return document;
       },
     },
   }
 );
 
 // Index
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+// TODO: consider this
+// userSchema.index({ email: 1 });
+// userSchema.index({ username: 1 });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 12);
-  }
-  next();
-});
+  try {
+    if (this.isModified("password")) {
+      this.password = await bcrypt.hash(this.password, 12);
+    }
 
-// userSchema.methods.comparePassword = async function (
-//   candidatePassword: string
-// ) {
-//   const { compare } = await import("bcryptjs");
-//   return compare(candidatePassword, this.password);
-// };
+    // Passes control to the next middleware in the document's save operation
+    next();
+  } catch (error) {
+    logger.error("Error hashing password:", error);
+    next();
+  }
+});
 
 export const User = mongoose.model<IUserDocument>("User", userSchema);
