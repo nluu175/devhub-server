@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import logger from "../config/logger";
 
 // Document provides built-in MongoDB document methods like save(), update(),
-interface IUser extends Document {
+export interface IUser extends Document {
   username: string;
   email: string;
   password: string;

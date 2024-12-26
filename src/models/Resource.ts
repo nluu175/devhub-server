@@ -56,8 +56,8 @@ const resourceSchema = new Schema<IResource>(
     },
     type: {
       type: String,
+      enum: ResourceType,
       required: [true, "Resource type is required"],
-      enum: ["TUTORIAL", "TOOL", "LIBRARY", "ARTICLE"],
     },
     tags: [
       {

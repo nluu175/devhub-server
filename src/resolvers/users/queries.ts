@@ -1,11 +1,11 @@
 import { GraphQLError } from "graphql";
-import { User } from "../../models/User";
+import { IUser, User } from "../../models/User";
 import logger from "../../config/logger";
 
 import { ErrorCode } from "../../types/error-codes";
 
 export const userQueries = {
-  users: async (_: never) => {
+  users: async (_: never): Promise<IUser[]> => {
     try {
       logger.info("Fetching all users");
       const users = await User.find().exec();
@@ -22,7 +22,7 @@ export const userQueries = {
       });
     }
   },
-  user: async (_: never, { id }: { id: string }) => {
+  user: async (_: never, { id }: { id: string }): Promise<IUser> => {
     try {
       logger.info(`Fetching user with ID: ${id}`);
       const user = await User.findById(id).exec();
