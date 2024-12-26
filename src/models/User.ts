@@ -2,7 +2,8 @@ import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import logger from "../config/logger";
 
-export interface IUser {
+// Document provides built-in MongoDB document methods like save(), update(),
+interface IUser extends Document {
   username: string;
   email: string;
   password: string;
@@ -10,19 +11,19 @@ export interface IUser {
   avatar?: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-// Document provides built-in MongoDB document methods like save(), update(),
-export interface IUserDocument extends IUser, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+// interface IUserDocument extends IUser, Document {
+//   comparePassword(candidatePassword: string): Promise<boolean>;
+// }
 
 // This means:
 // - We're creating a new MongoDB schema
 // - Documents created with this schema should match the IUserDocument interface
 // - TypeScript will enforce this type checking
 // "trim" ensures saved strings are properly trimmed
-const userSchema = new Schema<IUserDocument>(
+const userSchema = new Schema<IUser>(
   {
     username: {
       type: String,
@@ -101,4 +102,4 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-export const User = mongoose.model<IUserDocument>("User", userSchema);
+export const User = mongoose.model<IUser>("User", userSchema);

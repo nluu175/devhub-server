@@ -11,9 +11,9 @@
 
 ## Database Schema
 
-User
-Resource
-Comment
-Vote
-Rating
-Category
+- User
+- Resource
+- Comment
+- Vote
+- Rating
+- Category

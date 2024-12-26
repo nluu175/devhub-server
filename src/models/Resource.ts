@@ -1,18 +1,28 @@
-// src/models/Resource.ts
 import mongoose, { Document, Schema } from "mongoose";
+import logger from "../config/logger";
 
-export interface IResource extends Document {
+enum ResourceType {
+  TUTORIAL = "TUTORIAL",
+  TOOL = "TOOL",
+  LIBRARY = "LIBRARY",
+  ARTICLE = "ARTICLE",
+}
+
+interface IResource extends Document {
   title: string;
   description: string;
   url: string;
-  type: "TUTORIAL" | "TOOL" | "LIBRARY" | "ARTICLE";
+  type: ResourceType;
   tags: string[];
   submittedById: mongoose.Types.ObjectId;
   votes: number;
   averageRating: number;
+  // handled by `timestamps: true`
   createdAt: Date;
   updatedAt: Date;
 }
+
+// interface IResourceDocument extends IResource, Document {}
 
 const resourceSchema = new Schema<IResource>(
   {
