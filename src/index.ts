@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 
 import { expressMiddleware } from "@apollo/server/express4";
 
-import { createApolloServer } from "./config/apollo";
+import { createGraphqlServer, createAuthGraphqlServer } from "./config/apollo";
 import { connectDB } from "./config/db";
 import logger from "./config/logger";
 
@@ -13,16 +13,21 @@ import { httpLogger } from "./middleware/httpLogger";
 import { verifyToken } from "./middleware/jwtVerify";
 
 import { apiRoutes } from "./routes/api";
+import { requestTimer } from "./middleware/performanceWatch";
 
 const app = express();
 let server;
+let authServer;
 
 async function startServer() {
   try {
     await connectDB();
 
-    server = createApolloServer();
+    server = createGraphqlServer();
     await server.start();
+
+    authServer = createAuthGraphqlServer();
+    await authServer.start();
 
     // Middlewares
     app.use(
@@ -36,20 +41,39 @@ async function startServer() {
     app.use(bodyParser.json());
     app.use(httpLogger);
 
-    // rest
+    // REST
     app.use("/api", apiRoutes);
 
-    // The reason for the hanging:
-
-    // In the original setup, the global middleware might have been interfering with Apollo's middleware
-    // Request processing could get stuck between different middleware layers
-    // The body parser might have already consumed the request body before Apollo's middleware could process it
-
+    // In the original setup, the global middleware might have been interfering with Apollo's middleware.
+    // Request processing could get stuck between different middleware layers.
+    // The body parser might have already consumed the request body before Apollo's middleware could process it.
     // By applying fresh middleware specifically for the GraphQL route:
     // - Each GraphQL request gets its own clean middleware stack
     // - The request body is properly parsed for Apollo
     // - CORS headers are properly set for GraphQL operations
     // - There's no interference between global and route-specific middleware
+
+    // This setup handles (at /graphql)
+    // - CORS handling
+    // - Request timing/logging
+    // - Body parsing
+    // - Token verification
+    // - GraphQL processing
+
+    app.use(
+      "/graphql/auth",
+      cors({
+        origin: "*",
+        credentials: false,
+        methods: ["POST", "GET", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      }),
+      requestTimer,
+      bodyParser.json({ limit: "50mb" }),
+      expressMiddleware(authServer, {
+        context: createContext,
+      })
+    );
 
     app.use(
       "/graphql",
@@ -59,24 +83,14 @@ async function startServer() {
         methods: ["POST", "GET", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
       }),
-      (req, res, next) => {
-        const start = Date.now();
-        res.on("finish", () => {
-          const duration = Date.now() - start;
-          logger.info(`Request completed in ${duration}ms`);
-          if (duration > 5000) {
-            logger.warn(`Slow request detected: ${duration}ms`);
-          }
-        });
-        next();
-      },
+      requestTimer,
       bodyParser.json({ limit: "50mb" }),
+      verifyToken,
       expressMiddleware(server, {
+        // TODO: purpose of this context?
         context: createContext,
       })
     );
-
-    app.use("/graphql", verifyToken, expressMiddleware(server));
 
     const PORT = process.env.PORT || 4000;
     const httpServer = app.listen(PORT, () => {

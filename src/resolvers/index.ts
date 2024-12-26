@@ -1,10 +1,17 @@
 import { userResolvers } from "./users";
 
-export const resolvers = {
+export const mainResolvers = {
   Query: {
     ...userResolvers.Query,
   },
   Mutation: {
-    ...userResolvers.Mutation,
+    addUser: userResolvers.Mutation.addUser,
+  },
+};
+
+export const authResolvers = {
+  Query: {},
+  Mutation: {
+    login: userResolvers.Mutation.login,
   },
 };

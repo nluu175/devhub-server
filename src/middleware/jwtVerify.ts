@@ -14,7 +14,7 @@ interface JwtPayload {
 // }
 
 // NOTE: Example of Header:
-// Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWYxZDVjN2U4ZDY3NjQ0YjY2NmYyMzYiLCJpYXQiOjE3MTA0MDk3MTksImV4cCI6MTcxMDQ5NjExOX0.7rxrF2FD6D3tKuYe4_jNqXZvwB4-9h1TpkrVwj2WUyQ
+// Authorization: Bearer [token]
 export const verifyToken = (
   req: Request,
   // req: CustomRequest,
