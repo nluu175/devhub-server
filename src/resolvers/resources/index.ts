@@ -1,7 +1,7 @@
 import { resourceQueries } from "./queries";
 import { resourceMutations } from "./mutations";
 
-export const userResolvers = {
+export const resourceResolvers = {
   Query: resourceQueries,
   Mutation: resourceMutations,
 };

@@ -56,7 +56,7 @@ const resourceSchema = new Schema<IResource>(
     },
     type: {
       type: String,
-      enum: ResourceType,
+      enum: Object.values(ResourceType), // Use enum values instead of enum type
       required: [true, "Resource type is required"],
     },
     tags: [
