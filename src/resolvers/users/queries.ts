@@ -2,6 +2,8 @@ import { GraphQLError } from "graphql";
 import { User } from "../../models/User";
 import logger from "../../config/logger";
 
+import { ErrorCode } from "../../types/error-codes";
+
 export const userQueries = {
   users: async (_: never) => {
     try {
@@ -14,7 +16,7 @@ export const userQueries = {
       logger.error("Error fetching users:", error);
       throw new GraphQLError("Failed to fetch users", {
         extensions: {
-          code: "INTERNAL_SERVER_ERROR",
+          code: ErrorCode.INTERNAL_SERVER_ERROR,
           error: error instanceof Error ? error.message : String(error),
         },
       });
@@ -28,7 +30,7 @@ export const userQueries = {
       if (!user) {
         throw new GraphQLError("User not found", {
           extensions: {
-            code: "NOT_FOUND",
+            code: ErrorCode.NOT_FOUND,
             userId: id,
           },
         });
@@ -43,7 +45,7 @@ export const userQueries = {
       logger.error("Error fetching user:", error);
       throw new GraphQLError("Failed to fetch user", {
         extensions: {
-          code: "INTERNAL_SERVER_ERROR",
+          code: ErrorCode.INTERNAL_SERVER_ERROR,
           error: error instanceof Error ? error.message : String(error),
         },
       });

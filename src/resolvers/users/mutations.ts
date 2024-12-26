@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../../models/User";
 import { AddUserInput, LoginInput } from "./types";
 import logger from "../../config/logger";
+import { ErrorCode } from "../../types/error-codes";
 
 export const userMutations = {
   addUser: async (_: never, { input }: { input: AddUserInput }) => {
@@ -28,7 +29,7 @@ export const userMutations = {
       if (!user) {
         logger.info(`No user found with email: ${email}`);
         throw new GraphQLError("Invalid email or password", {
-          extensions: { code: "INVALID_CREDENTIALS" },
+          extensions: { code: ErrorCode.INVALID_CREDENTIALS },
         });
       }
       logger.info(`User found with email: ${email}`);
@@ -43,10 +44,11 @@ export const userMutations = {
 
       if (!isValidPassword) {
         throw new GraphQLError("Invalid email or password", {
-          extensions: { code: "INVALID_CREDENTIALS" },
+          extensions: { code: ErrorCode.INVALID_CREDENTIALS },
         });
       }
 
+      // TODO: Refactor this?
       const token = jwt.sign(
         { userId: user._id },
         process.env.JWT_SECRET || "temporary-key",
@@ -69,7 +71,7 @@ export const userMutations = {
 
       throw new GraphQLError("Failed to login", {
         extensions: {
-          code: "INTERNAL_SERVER_ERROR",
+          code: ErrorCode.INVALID_CREDENTIALS,
           error: error instanceof Error ? error.message : String(error),
         },
       });

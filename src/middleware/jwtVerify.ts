@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { GraphQLError } from "graphql";
+
 import jwt from "jsonwebtoken";
+
 import logger from "../config/logger";
+
+import { ErrorCode } from "../types/error-codes";
 
 interface JwtPayload {
   userId: string;
@@ -26,14 +30,14 @@ export const verifyToken = (
 
     if (!authHeader) {
       throw new GraphQLError("Authorization header missing", {
-        extensions: { code: "UNAUTHENTICATED" },
+        extensions: { code: ErrorCode.UNAUTHENTICATED },
       });
     }
 
     const token = authHeader.split(" ")[1];
     if (!token) {
       throw new GraphQLError("Token not provided", {
-        extensions: { code: "UNAUTHENTICATED" },
+        extensions: { code: ErrorCode.UNAUTHENTICATED },
       });
     }
 
@@ -47,7 +51,7 @@ export const verifyToken = (
   } catch (error) {
     logger.error("Token verification failed:", error);
     throw new GraphQLError("Invalid or expired token", {
-      extensions: { code: "UNAUTHENTICATED" },
+      extensions: { code: ErrorCode.UNAUTHENTICATED },
     });
   }
 };
