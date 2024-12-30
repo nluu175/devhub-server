@@ -25,7 +25,7 @@ export const createGraphContext = async ({
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "yoursecretkey"
+      process.env.JWT_SECRET || "tempsecretkey"
     ) as { userId: string };
     const user = await User.findById(decoded.userId);
 

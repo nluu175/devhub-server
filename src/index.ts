@@ -40,15 +40,6 @@ async function startServer() {
     // REST
     app.use("/api", apiRoutes);
 
-    // In the original setup, the global middleware might have been interfering with Apollo's middleware.
-    // Request processing could get stuck between different middleware layers.
-    // The body parser might have already consumed the request body before Apollo's middleware could process it.
-    // By applying fresh middleware specifically for the GraphQL route:
-    // - Each GraphQL request gets its own clean middleware stack
-    // - The request body is properly parsed for Apollo
-    // - CORS headers are properly set for GraphQL operations
-    // - There's no interference between global and route-specific middleware
-
     app.use(
       "/graphql",
       cors({

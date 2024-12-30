@@ -59,7 +59,7 @@ export const userMutations = {
 
       const token = jwt.sign(
         { userId: user._id },
-        process.env.JWT_SECRET || "yoursecretkey",
+        process.env.JWT_SECRET || "tempsecretkey",
         { expiresIn: "24h" }
       );
 
