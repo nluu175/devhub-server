@@ -7,7 +7,7 @@ import { graphContext } from "../../middleware/graphContext";
 
 export const resourceMutations = {
   addResource: async (
-    _: never,
+    _: unknown,
     { input }: { input: AddResourceInput },
     context: graphContext
   ) => {

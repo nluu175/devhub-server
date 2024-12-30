@@ -13,7 +13,7 @@ import { graphContext } from "../../middleware/graphContext";
 
 export const userQueries = {
   users: async (
-    _: never,
+    _: unknown,
     args: {},
     context: graphContext
   ): Promise<IUser[]> => {
@@ -38,7 +38,7 @@ export const userQueries = {
     }
   },
   user: async (
-    _: never,
+    _: unknown,
     { id }: { id: string },
     context: graphContext
   ): Promise<IUser> => {

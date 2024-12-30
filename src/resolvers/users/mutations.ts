@@ -9,7 +9,7 @@ import { graphContext } from "../../middleware/graphContext";
 
 export const userMutations = {
   addUser: async (
-    _: never,
+    _: unknown,
     { input }: { input: AddUserInput },
     context: graphContext
   ) => {
@@ -28,7 +28,7 @@ export const userMutations = {
       throw new Error("Failed to create user");
     }
   },
-  login: async (_: never, { input }: { input: LoginInput }) => {
+  login: async (_: unknown, { input }: { input: LoginInput }) => {
     try {
       const { email, password } = input;
       logger.info(`Attempting login for email: ${email}`);
