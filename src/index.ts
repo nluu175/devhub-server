@@ -4,13 +4,12 @@ import bodyParser from "body-parser";
 
 import { expressMiddleware } from "@apollo/server/express4";
 
-import { createGraphqlServer, createAuthGraphqlServer } from "./config/apollo";
+import { createGraphqlServer } from "./config/apollo";
 import { connectDB } from "./config/db";
 import logger from "./config/logger";
 
-import { createContext } from "./middleware/context";
+import { createGraphContext } from "./middleware/graphContext";
 import { httpLogger } from "./middleware/httpLogger";
-import { verifyToken } from "./middleware/jwtVerify";
 
 import { apiRoutes } from "./routes/api";
 import { requestTimer } from "./middleware/performanceWatch";
@@ -25,9 +24,6 @@ async function startServer() {
 
     server = createGraphqlServer();
     await server.start();
-
-    authServer = createAuthGraphqlServer();
-    await authServer.start();
 
     // Middlewares
     app.use(
@@ -53,28 +49,6 @@ async function startServer() {
     // - CORS headers are properly set for GraphQL operations
     // - There's no interference between global and route-specific middleware
 
-    // This setup handles (at /graphql)
-    // - CORS handling
-    // - Request timing/logging
-    // - Body parsing
-    // - Token verification
-    // - GraphQL processing
-
-    app.use(
-      "/graphql/auth",
-      cors({
-        origin: "*",
-        credentials: false,
-        methods: ["POST", "GET", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-      }),
-      requestTimer,
-      bodyParser.json({ limit: "50mb" }),
-      expressMiddleware(authServer, {
-        context: createContext,
-      })
-    );
-
     app.use(
       "/graphql",
       cors({
@@ -85,10 +59,8 @@ async function startServer() {
       }),
       requestTimer,
       bodyParser.json({ limit: "50mb" }),
-      verifyToken,
       expressMiddleware(server, {
-        // TODO: purpose of this context?
-        context: createContext,
+        context: createGraphContext,
       })
     );
 

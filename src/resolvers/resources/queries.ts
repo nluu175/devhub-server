@@ -3,9 +3,14 @@ import { GraphQLError } from "graphql";
 import { Resource } from "../../models/Resource";
 import { ErrorCode } from "../../types/error-codes";
 import logger from "../../config/logger";
+import { graphContext } from "../../middleware/graphContext";
 
 export const resourceQueries = {
-  resources: async (_: never) => {
+  resources: async (_: never, args: {}, context: graphContext) => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
+
     try {
       logger.info("Fetching all resources");
       const resources = await Resource.find().exec();
@@ -21,7 +26,11 @@ export const resourceQueries = {
       });
     }
   },
-  resource: async (_: never, { id }: { id: string }) => {
+  resource: async (_: never, { id }: { id: string }, context: graphContext) => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
+
     try {
       logger.info(`Fetching resource with ID: ${id}`);
       const resource = await Resource.findById(id).exec();

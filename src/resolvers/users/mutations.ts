@@ -5,9 +5,18 @@ import { User } from "../../models/User";
 import { AddUserInput, LoginInput } from "./types";
 import { ErrorCode } from "../../types/error-codes";
 import logger from "../../config/logger";
+import { graphContext } from "../../middleware/graphContext";
 
 export const userMutations = {
-  addUser: async (_: never, { input }: { input: AddUserInput }) => {
+  addUser: async (
+    _: never,
+    { input }: { input: AddUserInput },
+    context: graphContext
+  ) => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
+
     try {
       const newUser = await User.create(input);
       logger.info(`New user created: ${newUser.username}`);
@@ -48,10 +57,9 @@ export const userMutations = {
         });
       }
 
-      // TODO: Refactor this?
       const token = jwt.sign(
         { userId: user._id },
-        process.env.JWT_SECRET || "temporary-key",
+        process.env.JWT_SECRET || "yoursecretkey",
         { expiresIn: "24h" }
       );
 

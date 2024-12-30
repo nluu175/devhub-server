@@ -3,8 +3,8 @@ import { GraphQLError, GraphQLFormattedError } from "graphql";
 
 import logger from "./logger";
 
-import { mainTypeDefs, authTypeDefs } from "../schema/typeDefs";
-import { mainResolvers, authResolvers } from "../resolvers";
+import { typeDefs } from "../schema/typeDefs";
+import { mainResolvers } from "../resolvers";
 
 import { ErrorCode } from "../types/error-codes";
 
@@ -29,17 +29,8 @@ export const formatError = (formattedError: GraphQLFormattedError) => {
 
 export const createGraphqlServer = () => {
   return new ApolloServer({
-    typeDefs: mainTypeDefs,
+    typeDefs: typeDefs,
     resolvers: mainResolvers,
-    introspection: true,
-    formatError,
-  });
-};
-
-export const createAuthGraphqlServer = () => {
-  return new ApolloServer({
-    typeDefs: authTypeDefs,
-    resolvers: authResolvers,
     introspection: true,
     formatError,
   });

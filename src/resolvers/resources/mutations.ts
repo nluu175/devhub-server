@@ -3,10 +3,19 @@ import { AddResourceInput } from "./types";
 import { ErrorCode } from "../../types/error-codes";
 import { GraphQLError } from "graphql";
 import logger from "../../config/logger";
+import { graphContext } from "../../middleware/graphContext";
 
 export const resourceMutations = {
-  addResource: async (_: never, { input }: { input: AddResourceInput }) => {
+  addResource: async (
+    _: never,
+    { input }: { input: AddResourceInput },
+    context: graphContext
+  ) => {
     try {
+      if (!context.isAuthenticated) {
+        throw new GraphQLError("Not authenticated");
+      }
+
       const newResource = await Resource.create(input);
       logger.info(`New resource created: ${newResource.title}`);
 

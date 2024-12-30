@@ -14,9 +14,9 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-// interface IUserDocument extends IUser, Document {
-//   comparePassword(candidatePassword: string): Promise<boolean>;
-// }
+export interface IUserDocument extends IUser, Document {
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
 
 // This means:
 // - We're creating a new MongoDB schema

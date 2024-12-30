@@ -3,9 +3,24 @@ import { IUser, User } from "../../models/User";
 import logger from "../../config/logger";
 
 import { ErrorCode } from "../../types/error-codes";
+import { graphContext } from "../../middleware/graphContext";
+
+// The resolver function receives parameters in this order:
+// - parent (we use _ since we don't use it)
+// - args (empty object in this case since the query has no arguments)
+// - context (contains auth info)
+// - info (GraphQL execution info, rarely used)
 
 export const userQueries = {
-  users: async (_: never): Promise<IUser[]> => {
+  users: async (
+    _: never,
+    args: {},
+    context: graphContext
+  ): Promise<IUser[]> => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
+
     try {
       logger.info("Fetching all users");
       const users = await User.find().exec();
@@ -22,7 +37,15 @@ export const userQueries = {
       });
     }
   },
-  user: async (_: never, { id }: { id: string }): Promise<IUser> => {
+  user: async (
+    _: never,
+    { id }: { id: string },
+    context: graphContext
+  ): Promise<IUser> => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
+
     try {
       logger.info(`Fetching user with ID: ${id}`);
       const user = await User.findById(id).exec();

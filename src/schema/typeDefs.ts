@@ -1,4 +1,4 @@
-const baseTypeDefs = `#graphql
+export const typeDefs = `#graphql
   type User {
     id: ID!
     username: String!
@@ -29,10 +29,6 @@ const baseTypeDefs = `#graphql
     createdAt: String!
     updatedAt: String!
   }
-`;
-
-export const mainTypeDefs = `#graphql
-  ${baseTypeDefs}
 
   input UserInput {
     username: String!
@@ -53,22 +49,6 @@ export const mainTypeDefs = `#graphql
     averageRating: Float
   }
 
-  type Query {
-    users: [User]
-    user(id: ID!): User
-    resources: [Resource]
-    resource(id: ID!): Resource
-  }
-
-  type Mutation {
-    addUser(input: UserInput!): User
-    addResource(input: ResourceInput!): Resource
-  }
-`;
-
-export const authTypeDefs = `#graphql
-  ${baseTypeDefs}
-
   input LoginInput {
     email: String!
     password: String!
@@ -80,10 +60,15 @@ export const authTypeDefs = `#graphql
   }
 
   type Query {
-    _empty: String
+    users: [User]
+    user(id: ID!): User
+    resources: [Resource]
+    resource(id: ID!): Resource
   }
 
   type Mutation {
+    addUser(input: UserInput!): User
+    addResource(input: ResourceInput!): Resource
     login(input: LoginInput!): AuthPayload!
   }
 `;

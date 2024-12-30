@@ -4,7 +4,6 @@ import logger from "../config/logger";
 export const httpLogger = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
 
-  // Skip logging for Apollo health checks
   // These are POST requests to /graphql with no query
   if (
     req.path === "/graphql" &&
@@ -22,6 +21,5 @@ export const httpLogger = (req: Request, res: Response, next: NextFunction) => {
     );
   });
 
-  // Passes control to the next middleware in the HTTP request-response cycle
   next();
 };

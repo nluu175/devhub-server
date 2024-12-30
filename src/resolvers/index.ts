@@ -7,14 +7,7 @@ export const mainResolvers = {
     ...resourceResolvers.Query,
   },
   Mutation: {
-    addUser: userResolvers.Mutation.addUser,
+    ...userResolvers.Mutation,
     ...resourceResolvers.Mutation,
-  },
-};
-
-export const authResolvers = {
-  Query: {},
-  Mutation: {
-    login: userResolvers.Mutation.login,
   },
 };
