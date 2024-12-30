@@ -1,18 +1,24 @@
 import mongoose, { Document, Schema } from "mongoose";
 import logger from "../config/logger";
 
-enum ResourceType {
+enum ArticleType {
   TUTORIAL = "TUTORIAL",
   TOOL = "TOOL",
   LIBRARY = "LIBRARY",
   ARTICLE = "ARTICLE",
 }
 
+// TODO:
+// Currently considering 2 types of resource.
+// - article written on this platform
+// - url from other resource
 interface IResource extends Document {
   title: string;
   description: string;
-  url: string;
-  type: ResourceType;
+  content: string;
+  excerpt?: string; // preview of the content
+  url: string; // link to other resource?
+  articleType: ArticleType;
   tags: string[];
   submittedById: mongoose.Types.ObjectId;
   votes: number;
@@ -38,6 +44,14 @@ const resourceSchema = new Schema<IResource>(
       trim: true,
       maxlength: [2000, "Description cannot be more than 2000 characters"],
     },
+    content: {
+      type: String,
+      required: [true, "Content is required"],
+      trim: true,
+    },
+    excerpt: {
+      type: String,
+    },
     url: {
       type: String,
       required: [true, "URL is required"],
@@ -54,9 +68,9 @@ const resourceSchema = new Schema<IResource>(
         message: "Please enter a valid URL",
       },
     },
-    type: {
+    articleType: {
       type: String,
-      enum: Object.values(ResourceType), // Use enum values instead of enum type
+      enum: Object.values(ArticleType), // Use enum values instead of enum type
       required: [true, "Resource type is required"],
     },
     tags: [
@@ -89,8 +103,28 @@ const resourceSchema = new Schema<IResource>(
   }
 );
 
-// Indexes for better query performance
-resourceSchema.index({ title: "text", description: "text" });
+// TODO: Handle the case where first 200 chars has other format?
+resourceSchema.pre("save", function (next) {
+  if (this.isModified("content")) {
+    // Generate excerpt from content (first 200 characters)
+    this.excerpt = this.content.slice(0, 200).trim() + "...";
+  }
+  next();
+});
+
+resourceSchema.index(
+  { title: "text", description: "text", content: "text" },
+  {
+    weights: {
+      // Title matches are most important
+      // Description matches are second
+      // Content matches are third
+      title: 10,
+      description: 5,
+      content: 1,
+    },
+  }
+);
 resourceSchema.index({ tags: 1 });
 resourceSchema.index({ type: 1 });
 resourceSchema.index({ createdAt: -1 });
