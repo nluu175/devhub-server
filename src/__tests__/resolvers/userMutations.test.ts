@@ -1,9 +1,7 @@
-// src/__tests__/resolvers/userMutations.test.ts
 import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import { User } from "../../models/User.js";
 import { userMutations } from "../../resolvers/users/mutations.js";
-import { ErrorCode } from "../../types/error-codes.js";
 
 jest.mock("../../models/User");
 jest.mock("jsonwebtoken");

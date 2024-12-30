@@ -1,14 +1,11 @@
-// src/__tests__/resolvers/userQueries.test.ts
 import { GraphQLError } from "graphql";
 import { User } from "../../models/User";
 import { userQueries } from "../../resolvers/users/queries";
 
-// Mock the User model and logger
 jest.mock("../../models/User");
 jest.mock("../../config/logger");
 
 describe("User Queries", () => {
-  // Setup mock data
   const mockUsers = [
     {
       id: "1",
