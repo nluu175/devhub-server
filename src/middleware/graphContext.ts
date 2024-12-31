@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { IUser, User } from "../models/User";
 import logger from "../config/logger";
 
-export interface graphContext {
+export interface GraphContext {
   token?: string;
   user?: IUser;
   isAuthenticated: boolean;
@@ -13,7 +13,7 @@ export const createGraphContext = async ({
   req,
 }: {
   req: Request;
-}): Promise<graphContext> => {
+}): Promise<GraphContext> => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
 

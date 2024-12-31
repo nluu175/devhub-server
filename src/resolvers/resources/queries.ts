@@ -3,10 +3,10 @@ import { GraphQLError } from "graphql";
 import { Resource } from "../../models/Resource";
 import { ErrorCode } from "../../types/error-codes";
 import logger from "../../config/logger";
-import { graphContext } from "../../middleware/graphContext";
+import { GraphContext } from "../../middleware/graphContext";
 
 export const resourceQueries = {
-  resources: async (_: never, args: {}, context: graphContext) => {
+  resources: async (_: never, args: {}, context: GraphContext) => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
     }
@@ -26,7 +26,7 @@ export const resourceQueries = {
       });
     }
   },
-  resource: async (_: never, { id }: { id: string }, context: graphContext) => {
+  resource: async (_: never, { id }: { id: string }, context: GraphContext) => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
     }

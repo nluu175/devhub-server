@@ -4,10 +4,10 @@ import { resourceResolvers } from "./resources";
 export const mainResolvers = {
   Query: {
     ...userResolvers.Query,
-    ...resourceResolvers.Query,
+    // ...resourceResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
-    ...resourceResolvers.Mutation,
+    // ...resourceResolvers.Mutation,
   },
 };

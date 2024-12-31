@@ -3,7 +3,7 @@ import { IUser, User } from "../../models/User";
 import logger from "../../config/logger";
 
 import { ErrorCode } from "../../types/error-codes";
-import { graphContext } from "../../middleware/graphContext";
+import { GraphContext } from "../../middleware/graphContext";
 
 // The resolver function receives parameters in this order:
 // - parent
@@ -15,7 +15,7 @@ export const userQueries = {
   users: async (
     _: unknown,
     args: {},
-    context: graphContext
+    context: GraphContext
   ): Promise<IUser[]> => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
@@ -40,7 +40,7 @@ export const userQueries = {
   user: async (
     _: unknown,
     { id }: { id: string },
-    context: graphContext
+    context: GraphContext
   ): Promise<IUser> => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");

@@ -5,13 +5,13 @@ import { User } from "../../models/User";
 import { AddUserInput, LoginInput } from "./types";
 import { ErrorCode } from "../../types/error-codes";
 import logger from "../../config/logger";
-import { graphContext } from "../../middleware/graphContext";
+import { GraphContext } from "../../middleware/graphContext";
 
 export const userMutations = {
   addUser: async (
     _: unknown,
     { input }: { input: AddUserInput },
-    context: graphContext
+    context: GraphContext
   ) => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
@@ -28,7 +28,7 @@ export const userMutations = {
       throw new Error("Failed to create user");
     }
   },
-  login: async (_: unknown, { input }: { input: LoginInput }) => {
+  loginUser: async (_: unknown, { input }: { input: LoginInput }) => {
     try {
       const { email, password } = input;
       logger.info(`Attempting login for email: ${email}`);

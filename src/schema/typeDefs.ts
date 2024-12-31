@@ -1,74 +1,95 @@
-export const typeDefs = `#graphql
-  type User {
-    id: ID!
-    username: String!
-    email: String!
-    bio: String
-    avatar: String
-    createdAt: String
-    updatedAt: String
-  }
+// reference: https://graphql-compose.github.io/docs/6.x.x/plugins/plugin-mongoose.html
+// https://www.apollographql.com/docs/graphos/schema-design/guides/naming-conventions
+import { composeWithMongoose } from "graphql-compose-mongoose";
+import { schemaComposer } from "graphql-compose";
 
-  enum ResourceType {
-    TUTORIAL
-    TOOL
-    LIBRARY
-    ARTICLE
-  }
+import { GraphContext } from "../middleware/graphContext";
 
-  type Resource {
-    id: ID!
-    title: String!
-    description: String!
-    url: String!
-    type: ResourceType!
-    tags: [String]!
-    submittedById: ID!
-    votes: Int!
-    averageRating: Float!
-    createdAt: String!
-    updatedAt: String!
-  }
+import { User } from "../models/User";
+import { userQueries } from "../resolvers/users/queries";
+import { userMutations } from "../resolvers/users/mutations";
 
-  input UserInput {
-    username: String!
-    email: String!
-    password: String!
-    bio: String
-    avatar: String
-  }
+import { AddUserInput, LoginInput } from "../resolvers/users/types";
 
-  input ResourceInput {
-    title: String!
-    description: String!
-    url: String!
-    type: ResourceType!
-    tags: [String]
-    submittedById: ID!
-    votes: Int
-    averageRating: Float
-  }
+// User Type Composer
+const UserTC = composeWithMongoose(User);
 
-  input LoginInput {
-    email: String!
-    password: String!
-  }
+// Add custom id field and remove _id
+UserTC.addFields({
+  id: {
+    type: "MongoID",
+    resolve: (source) => source._id,
+  },
+});
+// UserTC.removeField("_id");
 
-  type AuthPayload {
-    token: String!
-    user: User!
-  }
+// Input Types
+const inputTypes = {
+  AddUserInput: {
+    username: "String!",
+    email: "String!",
+    password: "String!",
+    bio: "String",
+    avatar: "String",
+  },
+  LoginInput: {
+    email: "String!",
+    password: "String!",
+  },
+};
 
-  type Query {
-    users: [User]
-    user(id: ID!): User
-    resources: [Resource]
-    resource(id: ID!): Resource
-  }
+Object.entries(inputTypes).forEach(([name, fields]) => {
+  schemaComposer.createInputTC({ name, fields });
+});
 
-  type Mutation {
-    addUser(input: UserInput!): User
-    addResource(input: ResourceInput!): Resource
-    login(input: LoginInput!): AuthPayload!
-  }
-`;
+const resolvers = {
+  users: {
+    type: [UserTC],
+    resolve: ({ context }: { context: GraphContext }) =>
+      userQueries.users(null, {}, context),
+  },
+  user: {
+    type: UserTC,
+    args: { id: "String!" },
+    resolve: ({
+      args,
+      context,
+    }: {
+      args: { id: string };
+      context: GraphContext;
+    }) => userQueries.user(null, args, context),
+  },
+  addUser: {
+    type: UserTC,
+    args: { input: "AddUserInput!" },
+    resolve: ({
+      args,
+      context,
+    }: {
+      args: { input: AddUserInput };
+      context: GraphContext;
+    }) => userMutations.addUser(null, args, context),
+  },
+  loginUser: {
+    type: `type LoginResponse { token: String!, user: User! }`,
+    args: { input: "LoginInput!" },
+    resolve: ({ args }: { args: { input: LoginInput } }) =>
+      userMutations.loginUser(null, args),
+  },
+};
+
+Object.entries(resolvers).forEach(([name, resolver]) => {
+  UserTC.addResolver({ name, ...resolver });
+});
+
+schemaComposer.Query.addFields({
+  users: UserTC.getResolver("users"),
+  user: UserTC.getResolver("user"),
+});
+
+schemaComposer.Mutation.addFields({
+  addUser: UserTC.getResolver("addUser"),
+  loginUser: UserTC.getResolver("loginUser"),
+});
+
+export const typeDefs = schemaComposer.buildSchema();
