@@ -11,11 +11,10 @@ export const resourceMutations = {
     { input }: { input: AddResourceInput },
     context: GraphContext
   ) => {
+    if (!context.isAuthenticated) {
+      throw new GraphQLError("Not authenticated");
+    }
     try {
-      if (!context.isAuthenticated) {
-        throw new GraphQLError("Not authenticated");
-      }
-
       const newResource = await Resource.create(input);
       logger.info(`New resource created: ${newResource.title}`);
 

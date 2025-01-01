@@ -6,7 +6,7 @@ import logger from "../../config/logger";
 import { GraphContext } from "../../middleware/graphContext";
 
 export const resourceQueries = {
-  resources: async (_: never, args: {}, context: GraphContext) => {
+  resources: async (_: unknown, args: {}, context: GraphContext) => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
     }
@@ -26,7 +26,11 @@ export const resourceQueries = {
       });
     }
   },
-  resource: async (_: never, { id }: { id: string }, context: GraphContext) => {
+  resource: async (
+    _: unknown,
+    { id }: { id: string },
+    context: GraphContext
+  ) => {
     if (!context.isAuthenticated) {
       throw new GraphQLError("Not authenticated");
     }

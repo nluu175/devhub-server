@@ -6,43 +6,39 @@ import { schemaComposer } from "graphql-compose";
 import { GraphContext } from "../middleware/graphContext";
 
 import { User } from "../models/User";
+import { Resource } from "../models/Resource";
+
 import { userQueries } from "../resolvers/users/queries";
 import { userMutations } from "../resolvers/users/mutations";
+import { resourceQueries } from "../resolvers/resources/queries";
+import { resourceMutations } from "../resolvers/resources/mutations";
 
+// other required types
 import { AddUserInput, LoginInput } from "../resolvers/users/types";
+import { ArticleType, AddResourceInput } from "../resolvers/resources/types";
+import { scalarTypes, enumTypes, inputTypes } from "./types";
 
-// User Type Composer
+// Mongoose Schema to Type Composer
 const UserTC = composeWithMongoose(User);
+const ResourceTC = composeWithMongoose(Resource);
 
-// Add custom id field and remove _id
-UserTC.addFields({
-  id: {
-    type: "MongoID",
-    resolve: (source) => source._id,
-  },
+// -- Register Scalar Types
+Object.entries(scalarTypes).forEach(([name, definition]) => {
+  schemaComposer.createScalarTC({ name, ...definition });
 });
-// UserTC.removeField("_id");
 
-// Input Types
-const inputTypes = {
-  AddUserInput: {
-    username: "String!",
-    email: "String!",
-    password: "String!",
-    bio: "String",
-    avatar: "String",
-  },
-  LoginInput: {
-    email: "String!",
-    password: "String!",
-  },
-};
+// -- Register Enum Types
+Object.entries(enumTypes).forEach(([name, definition]) => {
+  schemaComposer.createEnumTC({ name, ...definition });
+});
 
+// -- Register Input Types
 Object.entries(inputTypes).forEach(([name, fields]) => {
   schemaComposer.createInputTC({ name, fields });
 });
 
-const resolvers = {
+export const resolvers = {
+  // --- User Resolver
   users: {
     type: [UserTC],
     resolve: ({ context }: { context: GraphContext }) =>
@@ -57,7 +53,9 @@ const resolvers = {
     }: {
       args: { id: string };
       context: GraphContext;
-    }) => userQueries.user(null, args, context),
+    }) => {
+      userQueries.user(null, args, context);
+    },
   },
   addUser: {
     type: UserTC,
@@ -76,20 +74,56 @@ const resolvers = {
     resolve: ({ args }: { args: { input: LoginInput } }) =>
       userMutations.loginUser(null, args),
   },
+
+  // --- Resource Resolver
+  resources: {
+    type: [ResourceTC],
+    resolve: ({ context }: { context: GraphContext }) =>
+      resourceQueries.resources(null, {}, context),
+  },
+  resource: {
+    type: ResourceTC,
+    args: { id: "String!" },
+    resolve: ({
+      args,
+      context,
+    }: {
+      args: { id: string };
+      context: GraphContext;
+    }) => {
+      resourceQueries.resource(null, args, context);
+    },
+  },
+  addResource: {
+    type: ResourceTC,
+    args: { input: "AddResourceInput!" },
+    resolve: ({
+      args,
+      context,
+    }: {
+      args: { input: AddResourceInput };
+      context: GraphContext;
+    }) => resourceMutations.addResource(null, args, context),
+  },
 };
 
+// -- Register Type Composer to Resolvers
 Object.entries(resolvers).forEach(([name, resolver]) => {
+  ResourceTC.addResolver({ name, ...resolver });
   UserTC.addResolver({ name, ...resolver });
 });
 
 schemaComposer.Query.addFields({
   users: UserTC.getResolver("users"),
   user: UserTC.getResolver("user"),
+  resources: ResourceTC.getResolver("resources"),
+  resource: ResourceTC.getResolver("resource"),
 });
 
 schemaComposer.Mutation.addFields({
   addUser: UserTC.getResolver("addUser"),
   loginUser: UserTC.getResolver("loginUser"),
+  addResource: ResourceTC.getResolver("addResource"),
 });
 
 export const typeDefs = schemaComposer.buildSchema();

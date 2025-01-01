@@ -16,7 +16,6 @@ import { requestTimer } from "./middleware/performanceWatch";
 
 const app = express();
 let server;
-let authServer;
 
 async function startServer() {
   try {
