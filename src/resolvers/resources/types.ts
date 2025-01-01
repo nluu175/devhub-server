@@ -11,13 +11,23 @@ export interface AddResourceInput {
   title: string;
   description: string;
   content: string;
-  excerpt?: string;
   url: string;
   articleType: ArticleType;
   tags: string[];
   submittedById: mongoose.Types.ObjectId;
   votes: number;
   averageRating: number;
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface UpdateResourceInput {
+  title?: string;
+  description?: string;
+  content?: string;
+  excerpt?: string;
+  url?: string;
+  articleType?: ArticleType;
+  tags?: string[];
+  submittedById?: mongoose.Types.ObjectId;
+  votes?: number;
+  averageRating?: number;
 }

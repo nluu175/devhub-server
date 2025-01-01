@@ -1,5 +1,4 @@
 import mongoose, { Document, Schema } from "mongoose";
-import logger from "../config/logger";
 
 enum ArticleType {
   TUTORIAL = "TUTORIAL",
@@ -15,8 +14,8 @@ enum ArticleType {
 interface IResource extends Document {
   title: string;
   description: string;
-  content: string;
-  excerpt?: string; // preview of the content
+  content: string; // currently considering markdown as a datatype
+  excerpt?: string; // preview of the content; auto-generated
   url: string; // link to other resource?
   articleType: ArticleType;
   tags: string[];
@@ -48,6 +47,10 @@ const resourceSchema = new Schema<IResource>(
       type: String,
       required: [true, "Content is required"],
       trim: true,
+      // TODO:
+      // Consider using this for markdown validation
+      // https://github.com/markdown-it/markdown-it
+      maxlength: [100000, "Content too long"],
     },
     excerpt: {
       type: String,
@@ -70,7 +73,7 @@ const resourceSchema = new Schema<IResource>(
     },
     articleType: {
       type: String,
-      enum: Object.values(ArticleType), // Use enum values instead of enum type
+      enum: Object.values(ArticleType),
       required: [true, "Resource type is required"],
     },
     tags: [
