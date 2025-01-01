@@ -4,7 +4,7 @@ import { GraphQLError, GraphQLFormattedError } from "graphql";
 import logger from "./logger";
 
 import { typeDefs } from "../schema/typeDefs";
-import { mainResolvers } from "../resolvers";
+import { resolvers } from "../resolvers";
 
 import { ErrorCode } from "../types/error-codes";
 
@@ -30,7 +30,7 @@ export const formatError = (formattedError: GraphQLFormattedError) => {
 export const createGraphqlServer = () => {
   return new ApolloServer({
     typeDefs: typeDefs,
-    resolvers: mainResolvers,
+    resolvers: resolvers,
     introspection: true,
     formatError,
   });
