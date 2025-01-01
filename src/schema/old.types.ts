@@ -1,5 +1,6 @@
 // NOTE: Currently need to manually modify this whenever there is a change in type
 // NOTE: This file must sync with whatever typescript types we use
+// TODO: Should look for a way to auto-sync these types
 
 // Scalar Types
 export const scalarTypes = {
