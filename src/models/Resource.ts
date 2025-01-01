@@ -107,7 +107,7 @@ const resourceSchema = new Schema<IResource>(
 resourceSchema.pre("save", function (next) {
   if (this.isModified("content")) {
     // Generate excerpt from content (first 200 characters)
-    this.excerpt = this.content.slice(0, 200).trim() + "...";
+    this.excerpt = this.content.slice(0, 50).trim() + "...";
   }
   next();
 });

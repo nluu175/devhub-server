@@ -43,12 +43,16 @@ export const typeDefs = `#graphql
   input AddResourceInput {
     title: String!
     description: String!
+    content: String!
+    excerpt: String
     url: String!
-    type: ArticleType!
-    tags: [String]
+    articleType: ArticleType!
+    tags: [String]!
     submittedById: ID!
-    votes: Int
-    averageRating: Float
+    votes: Int!
+    averageRating: Float!
+    createdAt: String!
+    updatedAt: String!
   }
 
   input LoginInput {
