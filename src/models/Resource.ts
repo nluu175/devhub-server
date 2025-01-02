@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+// reference: https://github.com/markdown-it/markdown-it
+import MarkdownIt from "markdown-it";
+import removeMd from "remove-markdown";
+import DOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
+
 enum ArticleType {
   TUTORIAL = "TUTORIAL",
   TOOL = "TOOL",
@@ -51,6 +57,18 @@ const resourceSchema = new Schema<IResource>(
       // Consider using this for markdown validation
       // https://github.com/markdown-it/markdown-it
       maxlength: [100000, "Content too long"],
+      validate: {
+        validator: (s: string) => {
+          const md = new MarkdownIt();
+          try {
+            md.render(s);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        message: "Invalid Markdown content",
+      },
     },
     excerpt: {
       type: String,
@@ -106,11 +124,22 @@ const resourceSchema = new Schema<IResource>(
   }
 );
 
-// TODO: Handle the case where first 200 chars has other format?
+// TODO: Handle the case where first 200 chars has other format (aka MARKDOWN)
 resourceSchema.pre("save", function (next) {
   if (this.isModified("content")) {
-    // Generate excerpt from content (first 200 characters)
-    this.excerpt = this.content.slice(0, 50).trim() + "...";
+    // Generate a plain-text excerpt
+    // reference: https://www.npmjs.com/package/remove-markdown
+    const window = new JSDOM("").window;
+    const domPurify = DOMPurify(window);
+
+    const sanitizedContent = domPurify.sanitize(this.content);
+
+    const plainTextContent = removeMd(sanitizedContent)
+      .replace(/[^\w\s]/g, "")
+      .trim();
+
+    // Generate an excerpt
+    this.excerpt = plainTextContent.slice(0, 200).trim() + "...";
   }
   next();
 });
