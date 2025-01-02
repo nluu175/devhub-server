@@ -124,21 +124,21 @@ const resourceSchema = new Schema<IResource>(
   }
 );
 
-// TODO: Handle the case where first 200 chars has other format (aka MARKDOWN)
+resourceSchema.pre("save", function (next) {
+  if (this.isModified("content")) {
+    const window = new JSDOM("").window;
+    const domPurify = DOMPurify(window);
+    this.content = domPurify.sanitize(this.content);
+  }
+  next();
+});
+
+// TODO: Handle the case where first 200 chars has other format (aka Markdown)
 resourceSchema.pre("save", function (next) {
   if (this.isModified("content")) {
     // Generate a plain-text excerpt
     // reference: https://www.npmjs.com/package/remove-markdown
-    const window = new JSDOM("").window;
-    const domPurify = DOMPurify(window);
-
-    const sanitizedContent = domPurify.sanitize(this.content);
-
-    const plainTextContent = removeMd(sanitizedContent)
-      .replace(/[^\w\s]/g, "")
-      .trim();
-
-    // Generate an excerpt
+    const plainTextContent = removeMd(this.content);
     this.excerpt = plainTextContent.slice(0, 200).trim() + "...";
   }
   next();
