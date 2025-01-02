@@ -53,22 +53,30 @@ const resourceSchema = new Schema<IResource>(
       type: String,
       required: [true, "Content is required"],
       trim: true,
+      maxlength: [100000, "Content too long"],
       // TODO:
       // Consider using this for markdown validation
       // https://github.com/markdown-it/markdown-it
-      maxlength: [100000, "Content too long"],
-      validate: {
-        validator: (s: string) => {
-          const md = new MarkdownIt();
-          try {
-            md.render(s);
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        message: "Invalid Markdown content",
-      },
+      // NOTE: All strings are valid markdown
+      // validate: {
+      //   validator: (s: string) => {
+      //     if (s.includes("javascript:")) return false;
+
+      //     const md = new MarkdownIt({
+      //       html: false,
+      //       linkify: true,
+      //       typographer: true,
+      //     });
+
+      //     try {
+      //       md.render(s);
+      //       return true;
+      //     } catch {
+      //       return false;
+      //     }
+      //   },
+      //   message: "Invalid Markdown content",
+      // },
     },
     excerpt: {
       type: String,
@@ -124,23 +132,29 @@ const resourceSchema = new Schema<IResource>(
   }
 );
 
+// This middleware sanitize content field
 resourceSchema.pre("save", function (next) {
   if (this.isModified("content")) {
     const window = new JSDOM("").window;
     const domPurify = DOMPurify(window);
     this.content = domPurify.sanitize(this.content);
   }
+
   next();
 });
 
 // TODO: Handle the case where first 200 chars has other format (aka Markdown)
 resourceSchema.pre("save", function (next) {
+  // Generate a plain-text excerpt
+  // reference: https://www.npmjs.com/package/remove-markdown
   if (this.isModified("content")) {
-    // Generate a plain-text excerpt
-    // reference: https://www.npmjs.com/package/remove-markdown
-    const plainTextContent = removeMd(this.content);
-    this.excerpt = plainTextContent.slice(0, 200).trim() + "...";
+    const plainTextContent = removeMd(this.content)
+      .replace(/[()[\]]/g, "") // Remove brackets and parentheses
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
+    this.excerpt = plainTextContent.slice(0, 200) + "...";
   }
+
   next();
 });
 
