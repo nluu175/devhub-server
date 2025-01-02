@@ -1,18 +1,29 @@
 import mongoose, { Document, Schema } from "mongoose";
-import logger from "../config/logger";
 
-enum ResourceType {
+// reference: https://github.com/markdown-it/markdown-it
+import MarkdownIt from "markdown-it";
+import removeMd from "remove-markdown";
+import DOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
+
+enum ArticleType {
   TUTORIAL = "TUTORIAL",
   TOOL = "TOOL",
   LIBRARY = "LIBRARY",
   ARTICLE = "ARTICLE",
 }
 
+// TODO:
+// Currently considering 2 types of resource.
+// - article written on this platform
+// - url from other resource
 interface IResource extends Document {
   title: string;
   description: string;
-  url: string;
-  type: ResourceType;
+  content: string; // currently considering markdown as a datatype
+  excerpt?: string; // preview of the content; auto-generated
+  url: string; // link to other resource?
+  articleType: ArticleType;
   tags: string[];
   submittedById: mongoose.Types.ObjectId;
   votes: number;
@@ -38,6 +49,38 @@ const resourceSchema = new Schema<IResource>(
       trim: true,
       maxlength: [2000, "Description cannot be more than 2000 characters"],
     },
+    content: {
+      type: String,
+      required: [true, "Content is required"],
+      trim: true,
+      maxlength: [100000, "Content too long"],
+      // TODO:
+      // Consider using this for markdown validation
+      // https://github.com/markdown-it/markdown-it
+      // NOTE: All strings are valid markdown
+      // validate: {
+      //   validator: (s: string) => {
+      //     if (s.includes("javascript:")) return false;
+
+      //     const md = new MarkdownIt({
+      //       html: false,
+      //       linkify: true,
+      //       typographer: true,
+      //     });
+
+      //     try {
+      //       md.render(s);
+      //       return true;
+      //     } catch {
+      //       return false;
+      //     }
+      //   },
+      //   message: "Invalid Markdown content",
+      // },
+    },
+    excerpt: {
+      type: String,
+    },
     url: {
       type: String,
       required: [true, "URL is required"],
@@ -54,9 +97,9 @@ const resourceSchema = new Schema<IResource>(
         message: "Please enter a valid URL",
       },
     },
-    type: {
+    articleType: {
       type: String,
-      enum: Object.values(ResourceType), // Use enum values instead of enum type
+      enum: Object.values(ArticleType),
       required: [true, "Resource type is required"],
     },
     tags: [
@@ -89,8 +132,45 @@ const resourceSchema = new Schema<IResource>(
   }
 );
 
-// Indexes for better query performance
-resourceSchema.index({ title: "text", description: "text" });
+// This middleware sanitize content field
+resourceSchema.pre("save", function (next) {
+  if (this.isModified("content")) {
+    const window = new JSDOM("").window;
+    const domPurify = DOMPurify(window);
+    this.content = domPurify.sanitize(this.content);
+  }
+
+  next();
+});
+
+// TODO: Handle the case where first 200 chars has other format (aka Markdown)
+resourceSchema.pre("save", function (next) {
+  // Generate a plain-text excerpt
+  // reference: https://www.npmjs.com/package/remove-markdown
+  if (this.isModified("content")) {
+    const plainTextContent = removeMd(this.content)
+      .replace(/[()[\]]/g, "") // Remove brackets and parentheses
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
+    this.excerpt = plainTextContent.slice(0, 200) + "...";
+  }
+
+  next();
+});
+
+resourceSchema.index(
+  { title: "text", description: "text", content: "text" },
+  {
+    weights: {
+      // Title matches are most important
+      // Description matches are second
+      // Content matches are third
+      title: 10,
+      description: 5,
+      content: 1,
+    },
+  }
+);
 resourceSchema.index({ tags: 1 });
 resourceSchema.index({ type: 1 });
 resourceSchema.index({ createdAt: -1 });

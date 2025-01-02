@@ -1,4 +1,11 @@
 export const typeDefs = `#graphql
+  enum ArticleType {
+    TUTORIAL
+    TOOL
+    LIBRARY
+    ARTICLE
+  }
+
   type User {
     id: ID!
     username: String!
@@ -9,19 +16,14 @@ export const typeDefs = `#graphql
     updatedAt: String
   }
 
-  enum ResourceType {
-    TUTORIAL
-    TOOL
-    LIBRARY
-    ARTICLE
-  }
-
   type Resource {
     id: ID!
     title: String!
     description: String!
+    content: String!
+    excerpt: String
     url: String!
-    type: ResourceType!
+    articleType: ArticleType!
     tags: [String]!
     submittedById: ID!
     votes: Int!
@@ -30,7 +32,12 @@ export const typeDefs = `#graphql
     updatedAt: String!
   }
 
-  input UserInput {
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
+  input AddUserInput {
     username: String!
     email: String!
     password: String!
@@ -38,13 +45,35 @@ export const typeDefs = `#graphql
     avatar: String
   }
 
-  input ResourceInput {
+  input UpdateUserInput {
+    username: String
+    email: String
+    password: String
+    bio: String
+    avatar: String
+  }
+
+  input AddResourceInput {
     title: String!
     description: String!
+    content: String!
     url: String!
-    type: ResourceType!
-    tags: [String]
+    articleType: ArticleType!
+    tags: [String]!
     submittedById: ID!
+    votes: Int!
+    averageRating: Float!
+  }
+
+
+  input UpdateResourceInput {
+    title: String
+    description: String
+    content: String
+    url: String
+    articleType: ArticleType
+    tags: [String]
+    submittedById: ID
     votes: Int
     averageRating: Float
   }
@@ -52,11 +81,6 @@ export const typeDefs = `#graphql
   input LoginInput {
     email: String!
     password: String!
-  }
-
-  type AuthPayload {
-    token: String!
-    user: User!
   }
 
   type Query {
@@ -67,8 +91,8 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
-    addUser(input: UserInput!): User
-    addResource(input: ResourceInput!): Resource
-    login(input: LoginInput!): AuthPayload!
+    addUser(input: AddUserInput!): User
+    addResource(input: AddResourceInput!): Resource
+    loginUser(input: LoginInput!): AuthPayload!
   }
 `;

@@ -1,17 +1,15 @@
-export interface User {
+export interface AddUserInput {
   username: string;
   email: string;
   password: string;
   bio?: string;
   avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export interface AddUserInput {
-  username: string;
-  email: string;
-  password: string;
+export interface UpdateUserInput {
+  username?: string;
+  email?: string;
+  password?: string;
   bio?: string;
   avatar?: string;
 }

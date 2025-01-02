@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
-// TODO: move this to a shared location
-enum ResourceType {
+export enum ArticleType {
   TUTORIAL = "TUTORIAL",
   TOOL = "TOOL",
   LIBRARY = "LIBRARY",
@@ -11,12 +10,24 @@ enum ResourceType {
 export interface AddResourceInput {
   title: string;
   description: string;
+  content: string;
   url: string;
-  type: ResourceType;
+  articleType: ArticleType;
   tags: string[];
-  submittedById: string;
+  submittedById: mongoose.Types.ObjectId;
   votes: number;
   averageRating: number;
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface UpdateResourceInput {
+  title?: string;
+  description?: string;
+  content?: string;
+  excerpt?: string;
+  url?: string;
+  articleType?: ArticleType;
+  tags?: string[];
+  submittedById?: mongoose.Types.ObjectId;
+  votes?: number;
+  averageRating?: number;
 }

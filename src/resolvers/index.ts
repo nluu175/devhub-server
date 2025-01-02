@@ -1,7 +1,7 @@
 import { userResolvers } from "./users";
 import { resourceResolvers } from "./resources";
 
-export const mainResolvers = {
+export const resolvers = {
   Query: {
     ...userResolvers.Query,
     ...resourceResolvers.Query,
